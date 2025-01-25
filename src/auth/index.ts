@@ -22,18 +22,18 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     ],
     callbacks: {
         async signIn({ user, account }) {
-            //console.log("signIn", { user, account })
+            ////console.log("signIn", { user, account })
             //await UserModel.findOne({})
             if (!account) return false
             return true
             //return await loginOrCreateAccountService({ user, account }) as boolean
         },
         async session({ token, session }) {
-            console.log("session", session)
+            //console.log("session", session)
             return session;
         },
         async jwt({ token, trigger, session }) {
-            console.log("token", token)
+            //console.log("token", token)
             return token;
         },
     },
