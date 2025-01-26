@@ -2,6 +2,13 @@ import React from 'react'
 import { FormLogin } from './_login'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ButtonLoginWithGoogle } from './_button_login'
+import { Metadata } from 'next'
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+    return {
+        title: "Login",
+    }
+  }
 
 const PageLogin = () => {
     return (

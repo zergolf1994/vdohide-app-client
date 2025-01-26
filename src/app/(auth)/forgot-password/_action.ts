@@ -1,52 +1,41 @@
 "use server"
+
 import { env } from "@/env.mjs";
 import { VerificationEnum } from "@/lib/enums";
 import UserModel from "@/models/user.model";
 import VerificationCodeModel from "@/models/verification.model";
-import { registerSchema, registerSchemaType } from "@/validators/auth.validator"
+import { forgotPasswordSchema, forgotPasswordType } from "@/validators/auth.validator"
 import { AuthError } from "next-auth";
 
-export const ActionRegister = async (
-    values: registerSchemaType,
+export const ActionForgotPassword = async (
+    values: forgotPasswordType,
 ) => {
     try {
-
-        const validator = registerSchema.safeParse(values);
+        const validator = forgotPasswordSchema.safeParse(values);
         if (!validator.success) {
             throw new Error(validator.error.errors.map(err => err.message).join(', '));
         }
 
-        const { name, email, password, confirmPassword } = validator.data
+        const { email } = validator.data
         const existingUser = await UserModel.exists({
             email,
         });
-        if (existingUser) {
-            throw new Error(
-                "User already exists with this email",
-            );
+
+        if (!existingUser) {
+            return { status: true, message: "check you email" }
         }
-
-        const newUser = await UserModel.create({
-            name,
-            email,
-            password,
-        });
-
-        const userId = newUser._id;
+        const userId = existingUser._id;
 
         const verification = await VerificationCodeModel.create({
             userId,
-            type: VerificationEnum.EMAIL_VERIFICATION
+            type: VerificationEnum.PASSWORD_RESET
         });
 
-        const verificationUrl = `${env.NEXT_PUBLIC_APP_URL}/verify-email?code=${verification._id}`;
+        const verificationUrl = `${env.NEXT_PUBLIC_APP_URL}/reset-password?code=${verification._id}`;
 
         console.log("verificationUrl", verificationUrl)
-        //ทำระบบ ส่งอีเมลื
-        return {
-            message: "User registered successfully",
-            request_verify: true,
-        };
+
+        return { status: true, message: "check you email", redirect: true }
     } catch (error) {
         if (error instanceof AuthError) {
             switch (error.type) {

@@ -93,7 +93,7 @@ const MongooseAdapter = (
             return user;
         },
         async linkAccount(data) {
-            console.log("linkAccount: ", data);
+            // console.log("linkAccount: ", data);
             await dbConnect;
             const account = await AccountModel.create(data);
             return account;

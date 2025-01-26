@@ -1,46 +1,46 @@
 "use client"
 import React from 'react'
 
-import { loginSchema, loginSchemaType } from '@/validators/auth.validator';
+import { resetPasswordSchema, resetPasswordType } from '@/validators/auth.validator';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { ArrowRightIcon, LoaderIcon } from 'lucide-react';
+import { LoaderIcon } from 'lucide-react';
 import { PasswordInput } from '@/components/ui/input-password';
 import { toast } from 'sonner';
-import { ActionLogin } from './_action';
-import Link from 'next/link';
+import { PasswordStrength } from '@/components/shared/password-strength.shared';
+import { ActionSetupPassword } from './_action';
 
-export const FormLogin = () => {
+export const FormSetupPassword = ({ code }: { code: string }) => {
     const router = useRouter();
     const params = useSearchParams();
-    const email = params.get("email");
     const [isPending, startTransition] = React.useTransition();
 
-    const form = useForm<loginSchemaType>({
-        resolver: zodResolver(loginSchema),
+    const form = useForm<resetPasswordType>({
+        resolver: zodResolver(resetPasswordSchema),
         defaultValues: {
-            email: email || "",
+            verificationCode: code || "",
             password: "",
+            confirmPassword: "",
         },
     });
 
-    const onSubmit = async (values: loginSchemaType) => {
+    const onSubmit = async (values: resetPasswordType) => {
         startTransition(() => {
-            ActionLogin(values)
+            ActionSetupPassword(values)
                 .then((data) => {
-                    window.location.reload();
+                    toast(data?.message)
+                    if (data.redirect) {
+                        router.replace(`/login`)
+                    }
                 })
                 .catch((e) => {
                     toast.error(e?.message)
                 })
-
         })
-        // toast(JSON.stringify(values, null, 2))
     }
 
     return (
@@ -51,41 +51,33 @@ export const FormLogin = () => {
             >
                 <FormField
                     control={form.control}
-                    name="email"
+                    name="password"
                     render={({ field }) => (
                         <FormItem>
                             <FormLabel className="text-sm">
-                                email
+                                new password
                             </FormLabel>
                             <FormControl>
-                                <Input
-                                    placeholder="you@email.com"
+                                <PasswordInput
+                                    placeholder="••••••••••••"
                                     {...field}
                                     disabled={form.formState.isSubmitting}
                                     required
                                 />
                             </FormControl>
+                            <PasswordStrength password={field.value} />
                             <FormMessage />
                         </FormItem>
                     )}
                 />
                 <FormField
                     control={form.control}
-                    name="password"
+                    name="confirmPassword"
                     render={({ field }) => (
                         <FormItem>
-                            <div className="flex items-center">
-                                <FormLabel className="dark:text-[#f1f7feb5] text-sm">
-                                    password
-                                </FormLabel>
-
-                                <Link
-                                    className="ml-auto inline-block text-xs underline-offset-4 hover:underline"
-                                    href={`/forgot-password${form.getValues().email ? `?email=${form.getValues().email}` : ""}`}
-                                >
-                                    forgot-your-password
-                                </Link>
-                            </div>
+                            <FormLabel className="text-sm">
+                                confirmPassword
+                            </FormLabel>
                             <FormControl>
                                 <PasswordInput
                                     placeholder="••••••••••••"
@@ -106,8 +98,7 @@ export const FormLogin = () => {
                     {form.formState.isSubmitting ?
                         <LoaderIcon className="animate-spin" /> :
                         <>
-                            <span>sign-in</span>
-                            <ArrowRightIcon />
+                            <span>Update password</span>
                         </>
                     }
                 </Button>

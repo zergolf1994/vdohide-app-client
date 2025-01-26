@@ -1,8 +1,10 @@
 "use server"
 
 import dbConnect from "@/configs/db";
+import { VerificationEnum } from "@/lib/enums";
 import SessionModel from "@/models/session.model";
 import UserModel, { UserDocument } from "@/models/user.model";
+import VerificationCodeModel from "@/models/verification.model";
 import { loginSchemaType } from "@/validators/auth.validator";
 import { headers } from "next/headers";
 import { userAgent } from "next/server";
@@ -19,7 +21,7 @@ export const loginWithCredentials = async (values: loginSchemaType) => {
 
     await dbConnect()
     const user = await UserModel.findOne({ email });
-    if (!user || !user.password) return null
+    if (!user || !user.password || !user.isEmailVerified) return null
 
     const isPasswordValid = await user.comparePassword(password);
     if (!isPasswordValid) return null
@@ -31,4 +33,26 @@ export const loginWithCredentials = async (values: loginSchemaType) => {
 export const getSessionById = async (id: string) => {
     await dbConnect()
     return await SessionModel.findById(id).lean();
+}
+
+export const verifyEmail = async (code: string) => {
+    await dbConnect()
+
+    const validCode = await VerificationCodeModel.findOne({
+        _id: code,
+        type: VerificationEnum.EMAIL_VERIFICATION,
+    });
+
+    if (!validCode) return { status: "error" }
+
+    const updatedUser = await UserModel.findByIdAndUpdate(
+        validCode.userId,
+        {
+            isEmailVerified: true,
+        },
+        { new: true }
+    );
+    if (!updatedUser) return { status: "error" }
+    await validCode.deleteOne();
+    return { status: "success" }
 }

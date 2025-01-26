@@ -20,5 +20,5 @@ const verificationTokenSchema = new Schema<VerificationTokenDocument>(
     }
 );
 
-const VerificationTokenModel = mongoose?.models?.VerificationToken || mongoose.model<VerificationTokenDocument>("VerificationToken", verificationTokenSchema);
+const VerificationTokenModel = mongoose.models.VerificationToken || mongoose.model<VerificationTokenDocument>("VerificationToken", verificationTokenSchema);
 export default VerificationTokenModel;

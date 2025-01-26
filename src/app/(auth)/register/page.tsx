@@ -1,6 +1,13 @@
 import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { FormRegister } from './_register'
+import { Metadata } from 'next'
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+    return {
+        title: "Register",
+    }
+}
 
 const PageRegister = () => {
     return (
