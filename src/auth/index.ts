@@ -31,7 +31,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             return true
         },
         async redirect({ url, baseUrl }) {
-            console.log({ url, baseUrl })
             if (url.startsWith(baseUrl)) return url
             else if (url.startsWith('/')) return new URL(url, baseUrl).toString()
             return baseUrl

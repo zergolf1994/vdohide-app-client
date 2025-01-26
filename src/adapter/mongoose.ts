@@ -9,6 +9,8 @@ import UserModel from "@/models/user.model";
 import AccountModel from "@/models/account.model";
 import SessionModel from "@/models/session.model";
 import VerificationTokenModel from "@/models/verification-token.model";
+import { headers } from "next/headers";
+import { userAgent } from "next/server";
 
 export const format = {
     /** Takes a MongoDB object and returns a plain old JavaScript object */
@@ -43,10 +45,11 @@ const MongooseAdapter = (
         },
 
         async getUser(id) {
+            const { ua: user_agent } = userAgent({ headers: await headers() })
             // console.log("getUser: ", id);
             await dbConnect;
             const user = await UserModel.findById(id);
-            const session = await SessionModel.create({ userId: user?._id, sessionToken: uuidv4() });
+            const session = await SessionModel.create({ userId: user?._id, sessionToken: uuidv4(), user_agent });
             // console.log("getUser user: ", user);
             return { ...user._doc, sessionId: session?._id };
         },

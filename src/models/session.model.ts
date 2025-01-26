@@ -4,7 +4,8 @@ import { v4 as uuidv4 } from "uuid";
 
 export interface SessionDocument extends Document {
     userId: string;
-    sessionToken: string;
+    sessionToken?: string;
+    user_agent?: string;
     expires: Date;
     createdAt: Date;
     updatedAt: Date;
@@ -16,6 +17,7 @@ const sessionSchema = new Schema<SessionDocument>(
         _id: { type: String, default: () => uuidv4() },
         userId: { type: String, required: true },
         sessionToken: { type: String },
+        user_agent: { type: String },
         expires: { type: Date },
     },
     {
