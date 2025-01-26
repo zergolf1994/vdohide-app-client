@@ -1,6 +1,8 @@
 "use server"
 import { env } from "@/env.mjs";
 import { VerificationEnum } from "@/lib/enums";
+import { sendEmail } from "@/lib/mailers/mailer";
+import { verifyEmailTemplate } from "@/lib/mailers/template";
 import UserModel from "@/models/user.model";
 import VerificationCodeModel from "@/models/verification.model";
 import { registerSchema, registerSchemaType } from "@/validators/auth.validator"
@@ -41,8 +43,15 @@ export const ActionRegister = async (
 
         const verificationUrl = `${env.NEXT_PUBLIC_APP_URL}/verify-email?code=${verification._id}`;
 
-        console.log("verificationUrl", verificationUrl)
-        //ทำระบบ ส่งอีเมลื
+        //console.log("verificationUrl", verificationUrl)
+        
+        await sendEmail({
+            to: newUser.email,
+            ...verifyEmailTemplate({
+                username: newUser.name,
+                url: verificationUrl
+            }),
+        });
         return {
             message: "User registered successfully",
             request_verify: true,

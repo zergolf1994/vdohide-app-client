@@ -5,6 +5,7 @@ export default async function Home() {
   return (
     <>
       Welcome back <b>{data?.user.name}</b>
+      <pre>{JSON.stringify({ ...data?.user }, null, 4)}</pre>
     </>
   );
 }

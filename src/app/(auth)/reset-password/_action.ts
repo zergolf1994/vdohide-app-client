@@ -1,6 +1,8 @@
 "use server"
 import { hashValue } from "@/lib/bcrypt.lib";
 import { VerificationEnum } from "@/lib/enums";
+import { sendEmail } from "@/lib/mailers/mailer";
+import { passwordChangeTemplate } from "@/lib/mailers/template";
 import SessionModel from "@/models/session.model";
 import UserModel from "@/models/user.model";
 import VerificationCodeModel from "@/models/verification.model";
@@ -40,7 +42,15 @@ export const ActionSetupPassword = async (
         await SessionModel.deleteMany({
             userId: updatedUser._id,
         });
+        //ทำระบบ ส่งอีเมล์
+        const send = await sendEmail({
+            to: updatedUser?.email,
+            ...passwordChangeTemplate({
+                username: updatedUser.name,
+            }),
+        });
 
+        console.log(send)
         return { status: true, message: "Reset Password successfully", redirect: true }
     } catch (error) {
         return { status: false, message: "Something went wrong!" }

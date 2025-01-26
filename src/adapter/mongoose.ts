@@ -60,12 +60,13 @@ const MongooseAdapter = (
             return user;
         },
         async getUserByAccount(data) {
-            //console.log("getUserByAccount: ", data);
+            // console.log("getUserByAccount: ", data);
             const { providerAccountId, provider } = data;
             await dbConnect;
 
             // Get Account
             const account = await AccountModel.findOne({ providerAccountId, provider });
+            // console.log("account: ", account);
             if (!account) return null;
 
             // Find User
@@ -110,13 +111,13 @@ const MongooseAdapter = (
             if (account) return account;
         },
         async createSession(data) {
-            console.log("createSession: ", data);
+            // console.log("createSession: ", data);
             await dbConnect;
             const session = await SessionModel.create(data);
             return session;
         },
         async getSessionAndUser(sessionToken) {
-            console.log("getSessionAndUser: ", sessionToken);
+            // console.log("getSessionAndUser: ", sessionToken);
             await dbConnect;
 
             // Get Session
@@ -133,7 +134,7 @@ const MongooseAdapter = (
             return null;
         },
         async updateSession(data) {
-            console.log("updateSession: ", data);
+            // console.log("updateSession: ", data);
             const { id, ...restData } = data as AdapterSession & { id: string };
             await dbConnect;
             const session = await SessionModel.findByIdAndUpdate(id, restData, {
@@ -143,7 +144,7 @@ const MongooseAdapter = (
             return session;
         },
         async deleteSession(sessionToken) {
-            console.log("deleteSession: ", sessionToken);
+            // console.log("deleteSession: ", sessionToken);
             await dbConnect;
             const session = await SessionModel.findOneAndDelete({ sessionToken });
             return session;

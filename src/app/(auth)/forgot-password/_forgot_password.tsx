@@ -72,10 +72,10 @@ export const FormForgotPassword = () => {
                 <Button
                     type="submit"
                     className="w-full text-[15px] h-[40px] font-semibold"
-                    disabled={!form.formState.isValid}
+                    disabled={isPending || !form.formState.isValid}
                     variant="destructive"
                 >
-                    {form.formState.isSubmitting ?
+                    {(isPending || form.formState.isSubmitting) ?
                         <LoaderIcon className="animate-spin" /> :
                         <>
                             <span>Send reset instructions</span>

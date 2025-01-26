@@ -2,6 +2,8 @@
 
 import { env } from "@/env.mjs";
 import { VerificationEnum } from "@/lib/enums";
+import { sendEmail } from "@/lib/mailers/mailer";
+import { passwordResetTemplate } from "@/lib/mailers/template";
 import UserModel from "@/models/user.model";
 import VerificationCodeModel from "@/models/verification.model";
 import { forgotPasswordSchema, forgotPasswordType } from "@/validators/auth.validator"
@@ -17,13 +19,23 @@ export const ActionForgotPassword = async (
         }
 
         const { email } = validator.data
-        const existingUser = await UserModel.exists({
+        const existingUser = await UserModel.findOne({
             email,
-        });
+        }, { _id: 1, name: 1 });
 
         if (!existingUser) {
             return { status: true, message: "check you email" }
         }
+
+        const existingCode = await VerificationCodeModel.exists({
+            userId: existingUser?._id,
+            type: VerificationEnum.PASSWORD_RESET
+        });
+
+        if (existingCode) {
+            return { status: true, message: "A link to reset your password has been sent." }
+        }
+
         const userId = existingUser._id;
 
         const verification = await VerificationCodeModel.create({
@@ -33,7 +45,13 @@ export const ActionForgotPassword = async (
 
         const verificationUrl = `${env.NEXT_PUBLIC_APP_URL}/reset-password?code=${verification._id}`;
 
-        console.log("verificationUrl", verificationUrl)
+        const send = await sendEmail({
+            to: email,
+            ...passwordResetTemplate({
+                username: existingUser.name,
+                url: verificationUrl
+            }),
+        });
 
         return { status: true, message: "check you email", redirect: true }
     } catch (error) {

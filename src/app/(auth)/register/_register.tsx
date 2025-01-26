@@ -137,9 +137,9 @@ export const FormRegister = () => {
                 <Button
                     type="submit"
                     className="w-full text-[15px] h-[40px] font-semibold"
-                    disabled={!form.formState.isValid}
+                    disabled={isPending || !form.formState.isValid}
                 >
-                    {form.formState.isSubmitting ?
+                    {(isPending || form.formState.isSubmitting) ?
                         <LoaderIcon className="animate-spin" /> :
                         <>
                             <span>sign-up</span>

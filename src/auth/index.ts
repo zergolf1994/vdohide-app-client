@@ -10,6 +10,9 @@ import MongooseAdapter from '@/adapter/mongoose';
 import { loginSchema } from '@/validators/auth.validator';
 import { loginWithCredentials } from '@/queries/user.querirs';
 import { ExtendedUser } from '@/types/next-auth';
+import { userAgent } from 'next/server';
+import { headers } from 'next/headers';
+import { UserDocument } from '@/models/user.model';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     // debug: true,
@@ -50,12 +53,13 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             if (user) {
                 token.role = user.role;
                 token.sessionId = user.sessionId;
+                token.userId = token.sub;
             }
             return token
         },
         async session({ session, token }) {
             if (session.user) {
-                session.user.id = token.sub as string;
+                session.user.userId = token.userId as string;
                 session.user.sessionId = token.sessionId;
                 session.user.email = token.email as string;
                 session.user.role = token.role;
