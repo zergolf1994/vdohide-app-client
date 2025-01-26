@@ -48,5 +48,5 @@ accountSchema.set("toJSON", {
     },
 });
 
-const AccountModel = mongoose.models.Account || mongoose.model<AccountDocument>("Account", accountSchema);
+const AccountModel = mongoose?.models?.Account || mongoose.model<AccountDocument>("Account", accountSchema);
 export default AccountModel;
