@@ -1,4 +1,4 @@
-import NextAuth from 'next-auth';
+import NextAuth, { CredentialsSignin } from 'next-auth';
 import { authConfig } from '@/auth/config';
 import { v4 as uuidv4 } from "uuid";
 
@@ -7,7 +7,9 @@ import Google from 'next-auth/providers/google';
 
 import dbConnect from '@/configs/db';
 import MongooseAdapter from '@/adapter/mongoose';
-
+import { loginSchema } from '@/validators/auth.validator';
+import { loginWithCredentials } from '@/queries/user.querirs';
+import { ExtendedUser } from '@/types/next-auth';
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
     // debug: true,
@@ -24,7 +26,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             allowDangerousEmailAccountLinking: true
         }),
         //GitHub,
-        //Credentials({}),
+        Credentials({
+            async authorize(credentials, req) {
+                const validator = loginSchema.safeParse(credentials);
+                if (!validator.success) return null
+
+                const user = await loginWithCredentials(validator.data)
+                if (!user) return null
+                return user as ExtendedUser
+            }
+        }),
     ],
     callbacks: {
         async signIn({ user, account, profile }) {

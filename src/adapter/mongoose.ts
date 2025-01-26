@@ -1,5 +1,4 @@
 import mongoose, { Mongoose } from "mongoose";
-import { v4 as uuidv4 } from "uuid";
 import type {
     Adapter,
     AdapterSession,
@@ -49,7 +48,7 @@ const MongooseAdapter = (
             // console.log("getUser: ", id);
             await dbConnect;
             const user = await UserModel.findById(id);
-            const session = await SessionModel.create({ userId: user?._id, sessionToken: uuidv4(), user_agent });
+            const session = await SessionModel.create({ userId: user?._id, user_agent });
             // console.log("getUser user: ", user);
             return { ...user._doc, sessionId: session?._id };
         },

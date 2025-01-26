@@ -16,7 +16,7 @@ const sessionSchema = new Schema<SessionDocument>(
     {
         _id: { type: String, default: () => uuidv4() },
         userId: { type: String, required: true },
-        sessionToken: { type: String },
+        sessionToken: { type: String, default: () => uuidv4() },
         user_agent: { type: String },
         expires: { type: Date },
     },
@@ -34,5 +34,5 @@ sessionSchema.set("toJSON", {
     },
 });
 
-const SessionModel = mongoose.models.Session || mongoose.model<SessionDocument>("Session", sessionSchema);
+const SessionModel = mongoose?.models?.Session || mongoose.model<SessionDocument>("Session", sessionSchema);
 export default SessionModel;

@@ -1,3 +1,4 @@
+import { compareValue, hashValue } from "@/lib/bcrypt.lib";
 import mongoose, { Document, Schema } from "mongoose";
 import { v4 as uuidv4 } from "uuid";
 
@@ -51,16 +52,16 @@ const userSchema = new Schema<UserDocument>(
     }
 );
 
-// userSchema.pre("save", async function (next) {
-//     if (this.isModified("password")) {
-//         this.password = await hashValue(this.password);
-//     }
-//     next();
-// });
+userSchema.pre("save", async function (next) {
+    if (this.isModified("password")) {
+        this.password = await hashValue(this.password);
+    }
+    next();
+});
 
-// userSchema.methods.comparePassword = async function (value: string) {
-//     return compareValue(value, this.password);
-// };
+userSchema.methods.comparePassword = async function (value: string) {
+    return compareValue(value, this.password);
+};
 
 userSchema.set("toJSON", {
     transform: function (doc, ret) {
@@ -70,5 +71,5 @@ userSchema.set("toJSON", {
     },
 });
 
-const UserModel = mongoose.models.User || mongoose.model<UserDocument>("User", userSchema);
+const UserModel = mongoose?.models?.User || mongoose.model<UserDocument>("User", userSchema);
 export default UserModel;
