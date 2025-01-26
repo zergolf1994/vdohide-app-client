@@ -7,12 +7,18 @@ interface UserPreferences {
     twoFactorSecret?: string;
 }
 
+export enum UserRole {
+    USER = "user",
+    ADMIN = "admin"
+}
+
 export interface UserDocument extends Document {
     name: string;
     email: string;
     password: string;
     isEmailVerified: boolean;
     image: string;
+    role: UserRole;
     createdAt: Date;
     updatedAt: Date;
     userPreferences: UserPreferences;
@@ -36,6 +42,7 @@ const userSchema = new Schema<UserDocument>(
         password: { type: String },
         isEmailVerified: { type: Boolean, default: false },
         userPreferences: { type: userPreferencesSchema, default: {} },
+        role: { type: String, enum: UserRole, default: UserRole.USER },
         image: { type: String },
     },
     {

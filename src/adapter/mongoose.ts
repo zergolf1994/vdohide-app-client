@@ -1,13 +1,32 @@
 import mongoose, { Mongoose } from "mongoose";
+import { v4 as uuidv4 } from "uuid";
 import type {
     Adapter,
     AdapterSession,
     VerificationToken as AdapterVerificationToken,
 } from "next-auth/adapters";
-import UserModel from "@/models/user.models";
-import AccountModel from "@/models/account.models";
-import SessionModel from "@/models/session.models";
-import VerificationTokenModel from "@/models/verification-token.models";
+import UserModel from "@/models/user.model";
+import AccountModel from "@/models/account.model";
+import SessionModel from "@/models/session.model";
+import VerificationTokenModel from "@/models/verification-token.model";
+
+export const format = {
+    /** Takes a MongoDB object and returns a plain old JavaScript object */
+    from<T = Record<string, unknown>>(object: Record<string, any>): T {
+        const newObject: Record<string, unknown> = {};
+        for (const key in object) {
+            const value = object[key];
+            if (key === "_id") {
+                newObject.id = value.toHexString();
+            } else if (key === "userId") {
+                newObject[key] = value.toHexString();
+            } else {
+                newObject[key] = value;
+            }
+        }
+        return newObject as T;
+    },
+};
 
 const MongooseAdapter = (
     dbConnect: Promise<Mongoose>
@@ -24,16 +43,16 @@ const MongooseAdapter = (
         },
 
         async getUser(id) {
-            //console.log("getUser: ", id);
+            // console.log("getUser: ", id);
             await dbConnect;
             const user = await UserModel.findById(id);
-            //console.log("getUser user: ", user);
-            return user;
+            const session = await SessionModel.create({ userId: user?._id, sessionToken: uuidv4() });
+            // console.log("getUser user: ", user);
+            return { ...user._doc, sessionId: session?._id };
         },
 
         async getUserByEmail(email) {
             //console.log("getUserByEmail: ", email);
-
             await dbConnect;
             const user = await UserModel.findOne({ email });
             return user;
@@ -67,14 +86,12 @@ const MongooseAdapter = (
         },
         async deleteUser(userId) {
             //console.log("deleteUser: ", userId);
-
             await dbConnect;
             const user = await UserModel.findByIdAndDelete(userId);
             return user;
         },
         async linkAccount(data) {
-            //console.log("linkAccount: ", data);
-
+            console.log("linkAccount: ", data);
             await dbConnect;
             const account = await AccountModel.create(data);
             return account;
@@ -91,14 +108,13 @@ const MongooseAdapter = (
             if (account) return account;
         },
         async createSession(data) {
-            //console.log("createSession: ", data);
-
+            console.log("createSession: ", data);
             await dbConnect;
             const session = await SessionModel.create(data);
             return session;
         },
         async getSessionAndUser(sessionToken) {
-            //console.log("getSessionAndUser: ", sessionToken);
+            console.log("getSessionAndUser: ", sessionToken);
             await dbConnect;
 
             // Get Session
@@ -115,7 +131,7 @@ const MongooseAdapter = (
             return null;
         },
         async updateSession(data) {
-            //console.log("updateSession: ", data);
+            console.log("updateSession: ", data);
             const { id, ...restData } = data as AdapterSession & { id: string };
             await dbConnect;
             const session = await SessionModel.findByIdAndUpdate(id, restData, {
@@ -125,7 +141,7 @@ const MongooseAdapter = (
             return session;
         },
         async deleteSession(sessionToken) {
-            //console.log("deleteSession: ", sessionToken);
+            console.log("deleteSession: ", sessionToken);
             await dbConnect;
             const session = await SessionModel.findOneAndDelete({ sessionToken });
             return session;
@@ -133,7 +149,6 @@ const MongooseAdapter = (
         // These methods are required to support email / passwordless sign in:
         async createVerificationToken(data) {
             //console.log("createVerificationToken: ", data);
-
             await dbConnect;
             const verificationToken = await VerificationTokenModel.create(data);
             return verificationToken;
