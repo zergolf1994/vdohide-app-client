@@ -1,7 +1,7 @@
 "use client"
 import React from 'react'
 
-import { loginSchemaType, registerSchema, registerSchemaType } from '@/validators/auth.validator';
+import { registerSchema, registerSchemaType } from '@/validators/auth.validator';
 import { useRouter, useSearchParams } from 'next/navigation';
 
 import { useForm } from 'react-hook-form';
@@ -14,7 +14,6 @@ import { PasswordInput } from '@/components/ui/input-password';
 import { toast } from 'sonner';
 import { PasswordStrength } from '@/components/shared/password-strength.shared';
 import { ActionRegister } from './_action';
-import { sleep } from '@/lib/utils';
 
 export const FormRegister = () => {
     const router = useRouter();
@@ -33,12 +32,15 @@ export const FormRegister = () => {
     });
 
     const onSubmit = async (values: registerSchemaType) => {
-        await sleep(2000)
         startTransition(() => {
             ActionRegister(values)
                 .then((data) => {
+                    if (data.request_verify) {
+                        router.replace(`/check-email?type=register&email=${values?.email}`);
+                    } else {
+                        router.replace(`/login?email=${values?.email}`);
+                    }
                     toast.success(data.message)
-                    router.replace(`/login?email=${values?.email}`);
                 })
                 .catch((e) => {
                     toast.error(e?.message)
@@ -135,9 +137,9 @@ export const FormRegister = () => {
                 <Button
                     type="submit"
                     className="w-full text-[15px] h-[40px] font-semibold"
-                    disabled={!form.formState.isValid}
+                    disabled={isPending || !form.formState.isValid}
                 >
-                    {form.formState.isSubmitting ?
+                    {(isPending || form.formState.isSubmitting) ?
                         <LoaderIcon className="animate-spin" /> :
                         <>
                             <span>sign-up</span>

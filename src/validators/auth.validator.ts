@@ -35,7 +35,7 @@ export type verificationEmailType = z.infer<typeof verificationEmailSchema>
 export const resetPasswordSchema = z.object({
     password: passwordSchema,
     confirmPassword: passwordSchema,
-    verificationCode: verificationCodeSchema,
+    verificationCode: z.string().optional(),
 });
 
 export type resetPasswordType = z.infer<typeof resetPasswordSchema>

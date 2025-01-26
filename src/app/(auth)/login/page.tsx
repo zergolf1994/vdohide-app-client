@@ -2,6 +2,14 @@ import React from 'react'
 import { FormLogin } from './_login'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ButtonLoginWithGoogle } from './_button_login'
+import { Metadata } from 'next'
+import Link from 'next/link'
+
+export async function generateMetadata({ searchParams }: PageProps): Promise<Metadata> {
+    return {
+        title: "Login",
+    }
+}
 
 const PageLogin = () => {
     return (
@@ -24,6 +32,14 @@ const PageLogin = () => {
                         </React.Suspense>
                     </CardContent>
                 </Card>
+                <div className="text-center text-sm mt-5">
+                    <span className="mr-2">
+                        do-not-have-an-account
+                    </span>
+                    <Link href="/register" className="underline underline-offset-4">
+                        register
+                    </Link>
+                </div>
             </div>
         </>
     )
